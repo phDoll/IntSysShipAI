@@ -3,7 +3,7 @@ from random import randint, getrandbits
 import gym
 from gym import spaces
 import numpy as np
-from Ship import Ship
+from .Ship import Ship
 
 """
 Class representing the Battleship gym environment
