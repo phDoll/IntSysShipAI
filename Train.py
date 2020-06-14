@@ -1,7 +1,6 @@
 import gym
 import gym_battleships
 from Config import Config
-# Config: First Argument: BoardSize, Second: Ships, Third: Ships placed with Gap or not
 from Result import Result
 
 # Inits config class
