@@ -1,3 +1,4 @@
+from copy import deepcopy
 from random import randint, getrandbits
 
 import gym
@@ -23,6 +24,10 @@ class BattleshipsEnv(gym.Env):
     # Instanciate variables
     # Boolean if ships can touch each other
     self.gap = config.gap
+
+    self.static_placement = config.static_placement
+    self.placement = None
+    self.placement_ships = None
 
     # The player board "radar" where he registers his shots.
     self.radar = []
@@ -70,7 +75,10 @@ class BattleshipsEnv(gym.Env):
   '''
   def step(self, action):
     # Map the action to the board and get x,y coordinates of the next field to shot
-    x, y = np.unravel_index(action, (self.board_size, self.board_size))
+    try:
+      x, y = np.unravel_index(action, (self.board_size, self.board_size))
+    except:
+      print('opsi')
 
     # initialize reward with -1
     reward = -1
@@ -196,6 +204,11 @@ class BattleshipsEnv(gym.Env):
       # Check if all ships where placed
       if ships_placed == len(self.ships):
         all_ships_placed = True
+
+      if self.static_placement and self.placement is None:
+        self.placement = np.copy(board)
+        self.placement_ships = deepcopy(ships)
+
     return ships
 
   '''
@@ -580,4 +593,8 @@ class BattleshipsEnv(gym.Env):
       for y in range(self.board_size):
         self.available_actions.append((x, y))
     # places enemy ships on the enemy board
-    self.enemyShips = self.place_ships(self.enemy_board)
+    if self.placement_ships and self.placement is not None:
+      self.enemyShips = deepcopy(self.placement_ships)
+      self.enemy_board = np.copy(self.placement)
+    else:
+      self.enemyShips = self.place_ships(self.enemy_board)

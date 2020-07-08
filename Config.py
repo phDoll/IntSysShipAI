@@ -10,7 +10,8 @@ class Config:
     gap = Boolean: True => Ships have a gap of at least 1 water field between each other.
     False => Ships can be placed side by side
     """
-    def __init__(self, board_size, ships, gap):
+    def __init__(self, board_size, ships, gap, static_placement):
         self.board_size = board_size
         self.ships = ships
         self.gap = gap
+        self.static_placement = static_placement
