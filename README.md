@@ -5,9 +5,11 @@ ShipzAI is a reinforcment learning for the classic game Battleships.
 ShipzAI uses the [OpenAI Gym toolkit](https://gym.openai.com/) and [Numpy](https://numpy.org/)
 for the implementation.    
 To install the dependencies typ:  
-```pip install gym numpy ```  
+```pip install gym numpy tensorflow==1.13.2 stable-baselines```  
 After installtion, ShipzAI can be run like:  
-```python Train.py ```
+```python Play.py ```  
+Model can be trained with e.g.:  
+```python TrainACKTR.py```
 
 ## Authors
 Philipp Doll MatrNr: 700911   
