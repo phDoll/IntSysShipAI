@@ -24,6 +24,7 @@ class BattleshipsEnv(gym.Env):
     # Instanciate variables
     # Boolean if ships can touch each other
     self.gap = config.gap
+    self.binary_reward = config.binary_reward
 
     self.static_placement = config.static_placement
     self.placement = None
@@ -56,6 +57,8 @@ class BattleshipsEnv(gym.Env):
     # Set the size of the board
     self.board_size = config.board_size
 
+    self.steps = 0
+
     # Set up the game for a new round
     self.set_up()
 
@@ -75,28 +78,39 @@ class BattleshipsEnv(gym.Env):
   '''
   def step(self, action):
     # Map the action to the board and get x,y coordinates of the next field to shot
-    try:
-      x, y = np.unravel_index(action, (self.board_size, self.board_size))
-    except:
-      print('opsi')
+    x, y = np.unravel_index(action, (self.board_size, self.board_size))
 
-    # initialize reward with -1
-    reward = -1
+    # initialize reward with 0
+    reward = 0
 
     #Check if x, y allready have been shot.
     if (x, y) not in self.available_actions:
 
+      double_shot_reward = -1000
+
+      if self.binary_reward:
+        double_shot_reward = -1
+
+      return self.radar, double_shot_reward, True, {
+        'miss_count': 0,
+        'hit_count': 0,
+        'empty_count': 0,
+        'sunken_count': 0
+      }
+
       # Add negative reward for shooting a forbidden field
-      reward -= 2 * self.board_size
+      #reward -= 2 * self.board_size
 
       # Get a random index of available actions
       random_index = np.random.randint(0, len(self.available_actions))
 
       # Get x,y coordinates from a random valid available action
-      x, y = self.available_actions[random_index]
+      #x, y = self.available_actions[random_index]
 
     # Shoot coordinates
     hit = self.shoot(x, y)
+
+    self.steps += 1
 
     # Evaluate result of shot
     after_shot_state = self.radar
@@ -114,7 +128,10 @@ class BattleshipsEnv(gym.Env):
     done = self.check_done()
 
     # Calculate reward
-    reward = self.calculate_reward(reward, hit, done)
+    reward += self.calculate_reward(hit, done, self.steps)
+
+    if self.binary_reward:
+      reward = 1
 
     return after_shot_state, reward, done, info
 
@@ -517,11 +534,10 @@ class BattleshipsEnv(gym.Env):
         # Set radar board field to hit
         self.radar[x, y] = self.fieldEncoding['X']
         hit = True
-      # Check whether the ship is sunken
-      if ship.sunken():
-        # Set radar board ship fields to sunken
-        self.draw_sunken(ship, self.radar)
-        hit = True
+        # Check whether the ship is sunken
+        if ship.sunken():
+          # Set radar board ship fields to sunken
+          self.draw_sunken(ship, self.radar)
 
     # Remove shoot Coordinate from list of available actions
     self.available_actions.remove((x, y))
@@ -553,12 +569,20 @@ class BattleshipsEnv(gym.Env):
   '''
   def check_done(self):
     # Possitive assumption the game is allways done
-    done = True
+    if self.binary_reward:
+      done = False
+    else:
+      done = True
+    #done = False
     # Iterate all enemy ships
     # Check if one of the enemy ships is not yet sunken
-    for ship in self.enemyShips:
-      if not ship.sunken():
-        done = False
+    if self.binary_reward:
+      if not self.available_actions:
+        done = True
+    else:
+      for ship in self.enemyShips:
+        if not ship.sunken():
+          done = False
     return done
 
   '''
@@ -568,15 +592,16 @@ class BattleshipsEnv(gym.Env):
   hit: Boolean last shoot was hit or miss 
   done: Boolean game is finished
   '''
-  def calculate_reward(self, reward, hit ,done):
+  def calculate_reward(self, hit, done, steps):
     # Agent gets a reward for hitting a ship
+    reward = 0
     if hit:
-      reward += 5
+      reward += 20
     # Agent gets more reward if he finishes the game
     if done:
-      reward += 20
+     reward += 100 * ((self.board_size*self.board_size) / self.steps)
     # Float for later calculations
-    return float(reward)
+    return int(round(reward))
 
   '''
   Method to setup the game environment.
@@ -598,3 +623,20 @@ class BattleshipsEnv(gym.Env):
       self.enemy_board = np.copy(self.placement)
     else:
       self.enemyShips = self.place_ships(self.enemy_board)
+
+    self.steps = 0
+
+  '''
+  Method calculates the maximum mean reward threshold for the callback in training. 
+  '''
+  def calculate_threshold(self):
+    if self.binary_reward:
+      return self.board_size * self.board_size
+    else:
+      ship_fields = 0
+      reward = 0
+      for ship_length in self.ships:
+        ship_fields += ship_length
+      reward += ship_fields * 20
+      reward += 100 * ((self.board_size*self.board_size) / ship_fields)
+      return int(round(reward))

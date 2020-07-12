@@ -9,7 +9,9 @@ class Result:
     reward = Overall reward of a played game
     rounds = Amount of rounds used to finish the game
     """
-    def __init__(self, history=[], reward=0, rounds=0):
+    def __init__(self, history=None, reward=0, rounds=0):
+        if history is None:
+            history = []
         self.history = history
         self.overall_reward = reward
         self.rounds = rounds
@@ -26,7 +28,7 @@ class Result:
     '''
     def append_history(self, round, action, observation, reward, done, info):
         self.history.append((round, action, observation, reward, done, info))
-        self.calculate_hit_miss_ratio(info['sunken_count'], info['miss_count'])
+        #self.calculate_hit_miss_ratio(info['sunken_count'], info['miss_count'])
         self.calculate_overall_reward(reward)
 
     '''
