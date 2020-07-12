@@ -24,6 +24,8 @@ checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./model_check
 
 
 # Uncomment, to train a new fresh model, otherwise a allready trained model will be trained
+# If a frehs model is trained, it should be trained with binary reward (Config) first, to reduce multiple
+# shots onto the same field.
 #model = ACKTR(MlpPolicy, env, verbose=2, tensorboard_log="./logs/progress_tensorboard/",  n_cpu_tf_sess=4)
 
 # Load current best model
