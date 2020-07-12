@@ -11,7 +11,9 @@ After installtion, ShipzAI can be run like:
 Model can be trained with e.g.:  
 ```python TrainACKTR.py```
 The progress of the training can be observed with Tensorboard:  
-```tensorboard --port 6004 --logdir ./logs/progress_tensorboard/```
+```tensorboard --port 6004 --logdir ./logs/progress_tensorboard/```  
+If a game is finished with a negativ reward/score an invalid action (shooting same field multiple times)  
+was executed.
 
 ## Authors
 Philipp Doll MatrNr: 700911   
