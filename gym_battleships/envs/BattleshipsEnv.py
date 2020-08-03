@@ -128,7 +128,7 @@ class BattleshipsEnv(gym.Env):
     done = self.check_done()
 
     # Calculate reward
-    reward += self.calculate_reward(hit, done, self.steps)
+    reward += self.calculate_reward(hit, done)
 
     if self.binary_reward:
       reward = 1
@@ -587,12 +587,11 @@ class BattleshipsEnv(gym.Env):
 
   '''
   Method for calculating the reward.
-  This method must be updated for reward based learning. Currently uses dummy values
-  reward: Current Reward of the Agent
+  This method must be updated for reward based learning.
   hit: Boolean last shoot was hit or miss 
   done: Boolean game is finished
   '''
-  def calculate_reward(self, hit, done, steps):
+  def calculate_reward(self, hit, done):
     # Agent gets a reward for hitting a ship
     reward = 0
     if hit:

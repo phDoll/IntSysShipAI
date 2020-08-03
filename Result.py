@@ -28,7 +28,6 @@ class Result:
     '''
     def append_history(self, round, action, observation, reward, done, info):
         self.history.append((round, action, observation, reward, done, info))
-        #self.calculate_hit_miss_ratio(info['sunken_count'], info['miss_count'])
         self.calculate_overall_reward(reward)
 
     '''
